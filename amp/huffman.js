@@ -1,16 +1,18 @@
+'use strict';
+
 // 1. get character count for inputted string
 
-
-
-const str = "hello_from_my_computer"
+const str = "hello_from_my_computer";
 
 const characterMap = {};
-
 for (let i = 0; i < str.length; ++i) {
 
     const char = str[i];
     characterMap[char] ? ++characterMap[char] : characterMap[char] = 1;
 }
+
+
+// 2. format map for later processing
 
 const transformMap = (map) => {
 
@@ -21,10 +23,10 @@ const transformMap = (map) => {
     })
     return returnArr;
 }
+const transformed = transformMap(characterMap);
 
 
-// 2. recursively find least frequest characers and combine least frequent 2 into one element in array
-
+// 3. recursively find least frequest characers and combine least frequent 2 into one element in array, with its children being the 2 elements it just combined
 
 const findLowestTwo = (arr) => {
 
@@ -64,23 +66,20 @@ const findLowestTwo = (arr) => {
             }
         }
     })
-}
-
-const transformed = transformMap(characterMap);
+};
 
 while (transformed.length > 1) {
 
     findLowestTwo(transformed);
 }
-console.log(JSON.stringify(transformed[0], null, 2));
 
 
 
-// 3. traverse tree and track path needed to reach each leaf node
+// 4. traverse tree and track path needed to reach each leaf node
 
 const finalTree = transformed[0];
 
-const getCode = (tree, char, path) => {
+const getCode = (tree, char, path = '') => {
 
     if (tree.char === char) {
         return path;
@@ -97,40 +96,40 @@ const getCode = (tree, char, path) => {
         })
     }
     return path;
-}
+};
 
-const res = getCode(finalTree, 'h', '')
 
-// 4. create map for character to binary representation
+// 5. create map for character to binary representation
 
 const encodedMap = {};
 
 Object.keys(characterMap).forEach((char) => {
 
-    encodedMap[char] = getCode(finalTree, char, '')
+    encodedMap[char] = getCode(finalTree, char);
 })
 
-// 5. create encoded string
 
+// 6. create encoded string
 
 let encodedStr = '';
 for (let i = 0; i < str.length; ++i) {
 
     const char = str[i];
     encodedStr += encodedMap[char];
-}
+};
 
 
-// 6. reverse encoding map from binary representation -> character
+// 7. reverse encoding map from binary representation -> character
 
 const reverseEncodedMap = {};
 Object.keys(encodedMap).forEach((k) => {
 
     const binary = encodedMap[k];
-    reverseEncodedMap[binary] = k
-})
+    reverseEncodedMap[binary] = k;
+});
 
-// 7. traverse encoded string and convert binary rep to original character
+
+// 8. traverse encoded string and convert binary rep to original character
 
 let decodedStr = '';
 let currentChar = '';
@@ -142,6 +141,11 @@ for (let i = 0; i < encodedStr.length; ++i) {
         decodedStr += reverseEncodedMap[currentChar];
         currentChar = '';
     }
-}
+};
 
-console.log('final decoded:::', decodedStr);
+console.log('original:', str);
+console.log('encoded:', encodedStr);
+console.log('decoded:', decodedStr);
+console.log('');
+console.log('encoded length', encodedStr.length);
+console.log('original length with no encoding', str.length * 8);
