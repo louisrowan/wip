@@ -4,13 +4,12 @@
 
 std::vector<int> merge (std::vector<int> v) {
 
-    int pivot = *(v.end() - 1);
+    int pivot = *(--v.end());
     std::vector<int> left;
     std::vector<int> right;
 
-    
     std::vector<int>::iterator it;
-    for (it = v.begin(); it < v.end() - 1; ++it) {
+    for (it = v.begin(); it != --v.end(); ++it) {
         if (*it < pivot) {
             left.push_back(*it);
         }
@@ -28,14 +27,11 @@ std::vector<int> merge (std::vector<int> v) {
 
     std::vector<int> res;
     std::vector<int>::iterator i;
-    std::cout << std::endl;
-    for (i = left.begin(); i < left.end(); ++i) {
-        std::cout << "push left:" << *i << std::endl;
+    for (i = left.begin(); i != left.end(); ++i) {
         res.push_back(*i);
     }
     res.push_back(pivot);
-    for (i = right.begin(); i < right.end(); ++i) {
-        std::cout << "push right:" << *i << std::endl;
+    for (i = right.begin(); i != right.end(); ++i) {
         res.push_back(*i);
     }
 
@@ -45,12 +41,12 @@ std::vector<int> merge (std::vector<int> v) {
 
 int main () {
 
-    std::vector<int> vec = { 1, 9, 3, 6, 99, 5, 9, 8, 3, 34, 9, 35, 99, 0, 3 };
+    std::vector<int> vec = { 1, 9, 3, 6, 99, 5, 9, 8, 3, 34, 9, 35, -99, 99, 0, 3 };
 
     std::vector<int> ret = merge(vec);
 
     std::cout << "final result:" << std::endl;
-    for (std::vector<int>::iterator i = ret.begin(); i < ret.end(); ++i) {
+    for (std::vector<int>::iterator i = ret.begin(); i != ret.end(); ++i) {
         std::cout << *i << std::endl;
     }
 
