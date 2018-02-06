@@ -1,3 +1,7 @@
+// 1. get character count for inputted string
+
+
+
 const str = "hello_from_my_computer"
 
 const characterMap = {};
@@ -17,6 +21,9 @@ const transformMap = (map) => {
     })
     return returnArr;
 }
+
+
+// 2. recursively find least frequest characers and combine least frequent 2 into one element in array
 
 
 const findLowestTwo = (arr) => {
@@ -68,6 +75,9 @@ while (transformed.length > 1) {
 console.log(JSON.stringify(transformed[0], null, 2));
 
 
+
+// 3. traverse tree and track path needed to reach each leaf node
+
 const finalTree = transformed[0];
 
 const getCode = (tree, char, path) => {
@@ -91,12 +101,16 @@ const getCode = (tree, char, path) => {
 
 const res = getCode(finalTree, 'h', '')
 
+// 4. create map for character to binary representation
+
 const encodedMap = {};
 
 Object.keys(characterMap).forEach((char) => {
 
     encodedMap[char] = getCode(finalTree, char, '')
 })
+
+// 5. create encoded string
 
 
 let encodedStr = '';
@@ -107,6 +121,7 @@ for (let i = 0; i < str.length; ++i) {
 }
 
 
+// 6. reverse encoding map from binary representation -> character
 
 const reverseEncodedMap = {};
 Object.keys(encodedMap).forEach((k) => {
@@ -115,6 +130,7 @@ Object.keys(encodedMap).forEach((k) => {
     reverseEncodedMap[binary] = k
 })
 
+// 7. traverse encoded string and convert binary rep to original character
 
 let decodedStr = '';
 let currentChar = '';
