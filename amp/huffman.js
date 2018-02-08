@@ -1,151 +1,200 @@
 'use strict';
 
-// 1. get character count for inputted string
+class Huffman {
 
-const str = "hello_from_my_computer";
+    constructor (str) {
 
-const characterMap = {};
-for (let i = 0; i < str.length; ++i) {
-
-    const char = str[i];
-    characterMap[char] ? ++characterMap[char] : characterMap[char] = 1;
-}
-
-
-// 2. format map for later processing
-
-const transformMap = (map) => {
-
-    const returnArr = [];
-    Object.keys(map).forEach((k) => {
-
-        returnArr.push({ value: map[k], char: k })
-    })
-    return returnArr;
-}
-const transformed = transformMap(characterMap);
-
-
-// 3. recursively find least frequest characers and combine least frequent 2 into one element in array, with its children being the 2 elements it just combined
-
-const findLowestTwo = (arr) => {
-
-    let lowest_a = {};
-    let lowest_b = {};
-
-    arr.forEach((obj) => {
-
-        const value = obj.value;
-
-        if (value < lowest_a.value || !lowest_a.value) {
-            lowest_b = lowest_a;
-            lowest_a = obj;
-        }
-        else if ( value < lowest_b.value || !lowest_b.value) {
-            lowest_b = obj;
-        }
-    });
-
-    const lowest_a_index = arr.findIndex((f) => f.char === lowest_a.char);
-    arr.splice(lowest_a_index, 1);
-    const lowest_b_index = arr.findIndex((f) => f.char === lowest_b.char);
-    arr.splice(lowest_b_index, 1);
-    arr.push({
-        value: lowest_a.value + lowest_b.value,
-        char: lowest_a.char + lowest_b.char,
-        children: {
-            '0': {
-                value: lowest_a.value,
-                char: lowest_a.char,
-                children: lowest_a.children
-            },
-            '1': {
-                value: lowest_b.value,
-                char: lowest_b.char,
-                children: lowest_b.children
-            }
-        }
-    })
-};
-
-while (transformed.length > 1) {
-
-    findLowestTwo(transformed);
-}
-
-
-
-// 4. traverse tree and track path needed to reach each leaf node
-
-const finalTree = transformed[0];
-
-const getCode = (tree, char, path = '') => {
-
-    if (tree.char === char) {
-        return path;
+        this.data = str;
+        this.characterMap = this.createCharacterMap();
+        this.huffmanTree = this.createTree();
+        this.encodedMap = this.createEncodedMap(this.characterMap);
     }
-    else {
-        Object.keys(tree.children).forEach((binary) => {
 
-            const child = tree.children[binary];
+    createCharacterMap () {
 
-            if (child.char.includes(char)) {
-                path += binary;
-                path = getCode(child, char, path);
+        const characterMap = {};
+        for (let i = 0; i < this.data.length; ++i) {
+
+            const char = this.data[i];
+            characterMap[char] ? ++characterMap[char] : characterMap[char] = 1;
+        }
+        return characterMap;
+    }
+
+    transformMap (map) {
+
+        const returnArr = [];
+        Object.keys(map).forEach((k) => {
+
+            returnArr.push({ value: map[k], char: k })
+        })
+        return returnArr;
+    }
+
+    createTree () {
+
+        const transformedMap = this.transformMap(this.characterMap);
+        while (transformedMap.length > 1) {
+
+            this.findLowestTwo(transformedMap);
+        }
+
+        return transformedMap[0];
+    }
+
+    createEncodedMap (characterMap) {
+
+        const encodedMap = {};
+
+        Object.keys(characterMap).forEach((char) => {
+
+            encodedMap[char] = this.getCode(this.huffmanTree, char);
+        })
+        return encodedMap;
+    }
+
+    findLowestTwo (arr) {
+
+        let lowest_a = {};
+        let lowest_b = {};
+
+        arr.forEach((obj) => {
+
+            const value = obj.value;
+
+            if (value < lowest_a.value || !lowest_a.value) {
+                lowest_b = lowest_a;
+                lowest_a = obj;
+            }
+            else if ( value < lowest_b.value || !lowest_b.value) {
+                lowest_b = obj;
+            }
+        });
+
+        const lowest_a_index = arr.findIndex((f) => f.char === lowest_a.char);
+        arr.splice(lowest_a_index, 1);
+        const lowest_b_index = arr.findIndex((f) => f.char === lowest_b.char);
+        arr.splice(lowest_b_index, 1);
+        arr.push({
+            value: lowest_a.value + lowest_b.value,
+            char: lowest_a.char + lowest_b.char,
+            children: {
+                '0': {
+                    value: lowest_a.value,
+                    char: lowest_a.char,
+                    children: lowest_a.children
+                },
+                '1': {
+                    value: lowest_b.value,
+                    char: lowest_b.char,
+                    children: lowest_b.children
+                }
             }
         })
     }
-    return path;
-};
 
+    getCode (tree, char, path = '') {
 
-// 5. create map for character to binary representation
+        if (tree.char === char) {
+            return path;
+        }
+        else {
+            Object.keys(tree.children).forEach((binary) => {
 
-const encodedMap = {};
+                const child = tree.children[binary];
 
-Object.keys(characterMap).forEach((char) => {
-
-    encodedMap[char] = getCode(finalTree, char);
-})
-
-
-// 6. create encoded string
-
-let encodedStr = '';
-for (let i = 0; i < str.length; ++i) {
-
-    const char = str[i];
-    encodedStr += encodedMap[char];
-};
-
-
-// 7. reverse encoding map from binary representation -> character
-
-const reverseEncodedMap = {};
-Object.keys(encodedMap).forEach((k) => {
-
-    const binary = encodedMap[k];
-    reverseEncodedMap[binary] = k;
-});
-
-
-// 8. traverse encoded string and convert binary rep to original character
-
-let decodedStr = '';
-let currentChar = '';
-for (let i = 0; i < encodedStr.length; ++i) {
-
-    const char = encodedStr[i];
-    currentChar += char;
-    if (reverseEncodedMap[currentChar]) {
-        decodedStr += reverseEncodedMap[currentChar];
-        currentChar = '';
+                if (child.char.includes(char)) {
+                    path += binary;
+                    path = this.getCode(child, char, path);
+                }
+            })
+        }
+        return path;
     }
-};
 
-console.log('original:', str);
-console.log('encoded:', encodedStr);
-console.log('decoded:', decodedStr);
-console.log('');
-console.log('encoded length', encodedStr.length);
-console.log('original length with no encoding', str.length * 8);
+    encode () {
+
+        let encodedStr = '';
+        for (let i = 0; i < this.data.length; ++i) {
+
+            const char = this.data[i];
+            encodedStr += this.encodedMap[char];
+        };
+        return encodedStr;
+    }
+
+    decode (encoded) {
+
+        const reverseEncodedMap = {};
+        Object.keys(this.encodedMap).forEach((k) => {
+
+            const binary = this.encodedMap[k];
+            reverseEncodedMap[binary] = k;
+        });
+
+        let decodedStr = '';
+        let currentChar = '';
+        for (let i = 0; i < encoded.length; ++i) {
+
+            const char = encoded[i];
+            currentChar += char;
+            if (reverseEncodedMap[currentChar]) {
+                decodedStr += reverseEncodedMap[currentChar];
+                currentChar = '';
+            }
+        };
+        return decodedStr;
+    }
+}
+
+
+const fs = require('fs');
+
+const data = fs.readFileSync('./text.txt').toString();
+
+
+const t = new Huffman(data);
+const encoded = t.encode();
+
+
+const toBinary = (char) => {
+
+    const code = char.charCodeAt(0);
+    const ret = code.toString(2).padStart(7, '0')
+    return ret;
+}
+
+let originalInBinary = '';
+for (let i = 0; i < data.length; ++i) {
+
+    const char = data[i];
+    originalInBinary += toBinary(char);
+}
+
+
+
+
+// console.log('encoded:', encodedStr);
+// console.log('decoded:', decodedStr);
+// console.log('');
+console.log('encoded length', encoded.length);
+console.log('original length with no encoding', originalInBinary.length);
+
+
+
+
+const binaryToAscii = (binary) => {
+
+    const ascii = parseInt(binary, 2).toString(10);
+    const ret = String.fromCharCode(ascii)
+    return ret;
+}
+
+let backToOriginal = '';
+for (let i = 0; i < originalInBinary.length; i += 7) {
+    const byte = originalInBinary.substring(i, i + 7);
+    backToOriginal += binaryToAscii(byte);
+}
+
+// console.log(backToOriginal);
+
