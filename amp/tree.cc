@@ -13,8 +13,8 @@ std::string getData(char** argv) {
     std::string line;
     std::string total;
     while(std::getline(data, line)) {
-        total += line;
-        // total += line + "\n";
+        // total += line;
+        total += line + "\n";
     }
     return total;
 }
@@ -157,7 +157,7 @@ std::string getCode (huffmanTree tree, char character, std::string path = "") {
 
 std::map<char, std::string> createEncodedMap(std::map<char, int> map, huffmanTree tree) {
 
-    printHuffmanTree(tree);
+    // printHuffmanTree(tree);
 
     std::map<char, std::string> ret;
 
@@ -171,15 +171,72 @@ std::map<char, std::string> createEncodedMap(std::map<char, int> map, huffmanTre
     return ret;
 }
 
+std::string encode(std::string str, std::map<char, std::string> map) {
+
+    std::string ret;
+    std::string::const_iterator it;
+    for (it = str.begin(); it != str.end(); ++it) {
+
+        char character = *it;
+        ret += map[character];
+    }
+    return ret;
+}
+
+std::map<std::string, char> createDecodedMap(std::map<char, std::string> encodedMap) {
+
+    std::map<std::string, char> ret;
+
+    std::map<char, std::string>::const_iterator it;
+    for (it = encodedMap.begin(); it != encodedMap.end(); ++it) {
+
+        std::string str = it->second;
+        ret[str] = it->first;
+    }
+    return ret;
+}
+
+std::string decode(std::map<std::string, char> decodeMap, std::string encodedStr) {
+
+    std::string decodedStr = "";
+    std::string currentStr = "";
+
+    std::string::const_iterator it;
+    for (it = encodedStr.begin(); it != encodedStr.end(); ++it) {
+
+        char character = *it;
+        currentStr += character;
+        if (decodeMap[currentStr]) {
+            decodedStr += decodeMap[currentStr];
+            currentStr = "";
+        }
+    }
+    return decodedStr;
+}
+
 
 
 int main (int argc, char** argv) {
 
     const std::string ORIGINAL_DATA = getData(argv);
+    std::cout << ORIGINAL_DATA << std::endl;
     const std::map<char, int> CHARACTER_MAP = createCharacterMap(ORIGINAL_DATA);
     const std::vector<huffmanTree> TRANSFORMED_MAP = createTransformedMap(CHARACTER_MAP);
     const huffmanTree FINAL_TREE = createFinalTree(TRANSFORMED_MAP);
-    const std::map<char, std::string> ENCODED_MAP = createEncodedMap(CHARACTER_MAP, FINAL_TREE);
+    const std::map<char, std::string> ENCODE_MAP = createEncodedMap(CHARACTER_MAP, FINAL_TREE);
+    const std::map<std::string, char> DECODE_MAP = createDecodedMap(ENCODE_MAP);
+
+    std::string ENCODED_STR = encode(ORIGINAL_DATA, ENCODE_MAP);
+    std::string DECODED_STR = decode(DECODE_MAP, ENCODED_STR);
+
+    std::cout << "*****" << std::endl;
+    std::cout << ENCODED_STR << std::endl;
+    std::cout << "*****" << std::endl;
+    std::cout << DECODED_STR << std::endl;
+
+    std::cout << "original size: " << ORIGINAL_DATA.size() * 7 << std::endl;
+    std::cout << "encoded size: " << ENCODED_STR.size() << std::endl;
+    std::cout << "final size: " << DECODED_STR.size() * 7 << std::endl;
 
     
     return 0;
